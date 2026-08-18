@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GLI Evaluatie Tool</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div><span class="eyebrow">GLI Slimmer</span><h1>Evaluatie Tool</h1></div>
+    <div class="mode-pill" id="modeLabel">Gespreksmodus</div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <button class="nav active" data-section="participant">Deelnemer</button>
+      <button class="nav" data-section="measurements">Metingen</button>
+      <button class="nav" data-section="conversation">Gesprek</button>
+      <button class="nav" data-section="analysis">Analyse</button>
+      <button class="nav" data-section="report">Rapportage</button>
+      <div class="mode-box">
+        <span class="eyebrow">Werkmodus</span>
+        <select id="modeSelect">
+          <option value="conversation">Gespreksmodus — luisteren</option>
+          <option value="analysis">Analysemodus</option>
+          <option value="report">Rapportagemodus</option>
+          <option value="calculation">Berekeningsmodus</option>
+        </select>
+        <p id="modeHelp">De tool verzamelt informatie en analyseert pas na een expliciet commando.</p>
+      </div>
+    </aside>
+
+    <section class="content">
+      <section class="panel active-panel" data-panel="participant">
+        <div class="section-heading"><div><span class="eyebrow">01 / Intake</span><h2>Deelnemer</h2></div><span class="status">Basisgegevens</span></div>
+        <div class="form-grid">
+          <label>Naam<input id="name" placeholder="Naam cliënt" /></label>
+          <label>Geboortedatum<input id="birthDate" type="date" /></label>
+          <label>Datum evaluatie<input id="evaluationDate" type="date" /></label>
+          <label>Begeleider<input id="coach" placeholder="Naam begeleider" /></label>
+          <label class="wide">Reden deelname<textarea id="reason" rows="3" placeholder="Wat was de aanleiding voor deelname?"></textarea></label>
+          <label class="wide">Relevante achtergrondgegevens<textarea id="background" rows="3" placeholder="Aandoeningen, medicatie, bijzonderheden..."></textarea></label>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="measurements">
+        <div class="section-heading"><div><span class="eyebrow">02 / Voortgang</span><h2>Metingen</h2></div><span class="status">Trend boven momentopname</span></div>
+        <div class="form-grid compact">
+          <label>Lengte (cm)<input id="height" type="number" min="100" max="250" step="0.1" /></label>
+          <label>Startgewicht (kg)<input id="startWeight" type="number" step="0.1" /></label>
+          <label>Huidig gewicht (kg)<input id="currentWeight" type="number" step="0.1" /></label>
+          <label>Startmiddelomtrek (cm)<input id="startWaist" type="number" step="0.1" /></label>
+          <label>Huidige middelomtrek (cm)<input id="currentWaist" type="number" step="0.1" /></label>
+          <label>Starttest / score<input id="startTest" placeholder="Bijv. SRT: 150 W" /></label>
+          <label>Huidige test / score<input id="currentTest" placeholder="Bijv. SRT: 175 W" /></label>
+        </div>
+        <div class="metrics" id="metrics"><div class="metric"><span>BMI</span><strong>—</strong></div><div class="metric"><span>Gewichtsverandering</span><strong>—</strong></div><div class="metric"><span>Verandering %</span><strong>—</strong></div></div>
+      </section>
+
+      <section class="panel" data-panel="conversation">
+        <div class="section-heading"><div><span class="eyebrow">03 / Gesprek</span><h2>Luisteren en verzamelen</h2></div><span class="status listening">● Luistermodus</span></div>
+        <div class="notice">De tool onderbreekt het gesprek niet. Voeg transcriptie of notities toe en gebruik daarna expliciet <strong>Analyseer gesprek</strong>.</div>
+        <div class="form-grid">
+          <label>Voeding<textarea id="nutrition" rows="4" placeholder="Wat gaat goed? Wat is lastig?"></textarea></label>
+          <label>Beweging<textarea id="movement" rows="4" placeholder="Frequentie, intensiteit, wandelen, fietsen, sport..."></textarea></label>
+          <label>Slaap en stress<textarea id="sleepStress" rows="4" placeholder="Slaapkwaliteit, stress, herstel..."></textarea></label>
+          <label>Gedrag en motivatie<textarea id="behavior" rows="4" placeholder="Barrières, wat werkt, zelfvertrouwen, motivatie..."></textarea></label>
+          <label class="wide">Transcriptie / vrije notities<textarea id="transcript" rows="8" placeholder="Plak hier het gesprek. De tool blijft stil totdat je analyse start."></textarea></label>
+        </div>
+        <button class="primary" id="analyzeBtn">Analyseer gesprek</button>
+      </section>
+
+      <section class="panel" data-panel="analysis">
+        <div class="section-heading"><div><span class="eyebrow">04 / Analyse</span><h2>Samengevatte analyse</h2></div><span class="status">Concept</span></div>
+        <div id="analysisOutput" class="output empty">Nog geen analyse uitgevoerd.</div>
+      </section>
+
+      <section class="panel" data-panel="report">
+        <div class="section-heading"><div><span class="eyebrow">05 / Rapportage</span><h2>GLI-traject evaluatie</h2></div><span class="status">Voor verwijzer</span></div>
+        <div class="form-grid"><label class="wide">Gemaakte afspraken<textarea id="agreements" rows="4"></textarea></label><label class="wide">Nieuwe doelen<textarea id="goals" rows="4"></textarea></label><label class="wide">Acties begeleider<textarea id="coachActions" rows="3"></textarea></label></div>
+        <button class="primary" id="reportBtn">Maak professioneel verslag</button>
+        <pre id="reportOutput" class="report-output"></pre>
+      </section>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
