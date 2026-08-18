@@ -1,48 +1,20 @@
-const $ = (id) => document.getElementById(id);
-const sections = document.querySelectorAll('[data-section]');
-const panels = document.querySelectorAll('[data-panel]');
-
-sections.forEach((button) => button.addEventListener('click', () => {
-  sections.forEach((b) => b.classList.toggle('active', b === button));
-  panels.forEach((p) => p.classList.toggle('active-panel', p.dataset.panel === button.dataset.section));
-}));
-
-const value = (id) => $(id).value.trim();
-const num = (id) => Number.parseFloat($(id).value);
-
-function calculate() {
-  const height = num('height') / 100, start = num('startWeight'), current = num('currentWeight');
-  const bmi = height > 0 && current > 0 ? current / (height * height) : null;
-  const delta = start > 0 && current > 0 ? current - start : null;
-  const pct = delta !== null ? (delta / start) * 100 : null;
-  $('metrics').innerHTML = [
-    ['BMI', bmi ? bmi.toFixed(1) : '—'],
-    ['Gewichtsverandering', delta !== null ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)} kg` : '—'],
-    ['Verandering %', pct !== null ? `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%` : '—']
-  ].map(([label, result]) => `<div class="metric"><span>${label}</span><strong>${result}</strong></div>`).join('');
-  return {bmi, delta, pct};
-}
-['height','startWeight','currentWeight'].forEach((id) => $(id).addEventListener('input', calculate));
-
-function analyze() {
-  const c = calculate();
-  const sections = [
-    ['Sterke punten', value('nutrition') || value('movement') ? 'Er zijn concrete leefstijlgegevens vastgelegd voor voeding en/of beweging.' : 'Nog onvoldoende informatie vastgelegd.'],
-    ['Aandachtspunten', value('sleepStress') || value('behavior') ? `${value('sleepStress') || ''}${value('sleepStress') && value('behavior') ? ' ' : ''}${value('behavior') || ''}` : 'Nog te bespreken in het evaluatiegesprek.'],
-    ['Voortgang metingen', c.delta !== null ? `Het gewicht veranderde met ${c.delta.toFixed(1)} kg (${c.pct.toFixed(1)}%). Het huidige BMI is ${c.bmi.toFixed(1)}.` : 'Gewichtsmetingen zijn nog niet volledig ingevuld.'],
-    ['Vervolg', 'Bespreek één haalbare gedragsverandering, leg de afspraak concreet vast en plan een volgend meetmoment.']
-  ];
-  $('analysisOutput').classList.remove('empty');
-  $('analysisOutput').innerHTML = sections.map(([h, t]) => `<div class="analysis-block"><h3>${h}</h3><div>${t}</div></div>`).join('');
-}
-$('analyzeBtn').addEventListener('click', () => { analyze(); document.querySelector('[data-section="analysis"]').click(); });
-
-function report() {
-  const c = calculate();
-  const weight = c.delta !== null ? `${c.delta.toFixed(1)} kg (${c.pct.toFixed(1)}%)` : 'niet berekend';
-  $('reportOutput').textContent = `GLI traject evaluatie\n\nDeelnemer: ${value('name') || 'onbekend'}\nDatum: ${value('evaluationDate') || 'niet ingevuld'}\n\nKorte samenvatting voor verwijzer\nDe deelnemer heeft het GLI-traject geëvalueerd. De voortgang, leefstijlgewoonten, ervaren barrières en vervolgstappen zijn besproken.\n\nVoortgang\n- Gewichtsverandering: ${weight}\n- Huidig BMI: ${c.bmi ? c.bmi.toFixed(1) : 'niet berekend'}\n- Beweging: ${value('movement') || 'niet beschreven'}\n\nLeefstijl en gedrag\n- Voeding: ${value('nutrition') || 'niet beschreven'}\n- Slaap en stress: ${value('sleepStress') || 'niet beschreven'}\n- Gedrag en motivatie: ${value('behavior') || 'niet beschreven'}\n\nGemaakte afspraken\n${value('agreements') || 'Nog niet ingevuld.'}\n\nNieuwe doelen\n${value('goals') || 'Nog niet ingevuld.'}\n\nActies begeleider\n${value('coachActions') || 'Nog niet ingevuld.'}`;
-}
-$('reportBtn').addEventListener('click', report);
-
-const modeTexts = {conversation:'De tool verzamelt informatie en analyseert pas na een expliciet commando.',analysis:'De tool structureert voortgang, sterke punten, knelpunten en doelen.',report:'De tool zet de analyse om in een professioneel GLI-verslag.',calculation:'De tool berekent BMI en veranderingen op basis van ingevulde meetwaarden.'};
-$('modeSelect').addEventListener('change', (e) => { const mode = e.target.value; $('modeLabel').textContent = e.target.options[e.target.selectedIndex].text.split(' —')[0]; $('modeHelp').textContent = modeTexts[mode]; });
+const $=id=>document.getElementById(id), value=id=>($(id)?.value||'').trim(), num=id=>Number.parseFloat($(id)?.value);
+let recognition=null,isRecording=false,finalText='',activeSpeaker='Coach',interim='',lastReport='';
+const typeLabels={intake:'Intake evaluatie',tussen:'Tussen evaluatie',eind:'Eind evaluatie'};
+const prompts={intake:'“Wat maakt dat je nu met leefstijl aan de slag wilt?”',tussen:'“Wat gaat er sinds de vorige evaluatie beter dan verwacht?”',eind:'“Waar ben je het meest tevreden over als je terugkijkt op het traject?”'};
+function bmi(){const h=num('height')/100,w=num('currentWeight');return h>0&&w>0?w/(h*h):null}
+function classification(x){if(!x)return'—';if(x<18.5)return'ondergewicht';if(x<25)return'gezond gewicht';if(x<30)return'overgewicht';return'obesitas'}
+function calculate(){const b=bmi(),wa=num('currentWaist');$('metrics').innerHTML=[['BMI',b?b.toFixed(1):'—'],['Classificatie',classification(b)],['Buikomvang',Number.isFinite(wa)?wa.toFixed(1)+' cm':'—']].map(([a,v])=>`<div class="metric"><span>${a}</span><strong>${v}</strong></div>`).join('');return{b,wa}}
+['height','currentWeight','currentWaist'].forEach(id=>$(id).addEventListener('input',calculate));
+function updateGuidance(){const text=(finalText+' '+interim).toLowerCase();let h='Open vraag',p=prompts[$('evaluationType').value],s='Gebruik OARS: open vragen, affirmaties, reflecties en samenvattingen.';if(/moeilijk|lukt niet|geen tijd|stress|barrière/.test(text)){h='Reflecteer en erken';p='“Ik hoor dat dit lastig is. Wat zou het iets haalbaarder maken?”';s='Vermijd reparatiereflex; vraag toestemming voordat je advies geeft.'}else if(/wil|ga|plan|voornemen|kan wel|gelukt/.test(text)){h='Versterk verandertaal';p='“Wat maakt dat dit voor jou belangrijk is?”';s='Laat de deelnemer zelf redenen en vertrouwen verwoorden.'}$('guidanceOutput').innerHTML=`<strong>${h}</strong><p>${p}</p><small>${s}</small>`}
+function renderTranscript(){const t=finalText+(interim?' '+interim:'');$('liveTranscript').innerHTML=t?escapeHtml(t):'<span class="placeholder">Luister mee…</span>';updateGuidance()}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function setupSpeech(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('speechSupport').textContent='Live spraakherkenning wordt niet ondersteund in deze browser. Je kunt wel handmatig tekst invoeren via het transcriptievak zodra dat beschikbaar is.';return null}const r=new SR();r.lang='nl-NL';r.continuous=true;r.interimResults=true;r.onresult=e=>{interim='';for(let i=e.resultIndex;i<e.results.length;i++){const txt=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=`[${activeSpeaker}] ${txt.trim()}\n`;else interim+=txt}renderTranscript()};r.onerror=()=>{if(isRecording)$('speechSupport').textContent='Spraakherkenning onderbroken; controleer microfoonrechten.'};r.onend=()=>{if(isRecording)try{r.start()}catch(e){}};return r}
+function start(){if(isRecording)return;recognition=setupSpeech();if(!recognition){alert('Deze browser ondersteunt geen live spraakherkenning.');return}isRecording=true;finalText='';interim='';recognition.start();$('startBtn').textContent='■ Stop gesprek';$('startBtn').classList.add('danger');$('recordingStatus').textContent='● Opname actief';$('recordingStatus').classList.add('recording');renderTranscript()}
+function stop(){isRecording=false;if(recognition)recognition.stop();interim='';$('startBtn').textContent='▶ Start evaluatie';$('startBtn').classList.remove('danger');$('recordingStatus').textContent='Opname gestopt';$('recordingStatus').classList.remove('recording');generateReport()}
+$('startBtn').addEventListener('click',()=>isRecording?stop():start());
+document.querySelectorAll('.speaker').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.speaker').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeSpeaker=b.dataset.speaker}));
+$('clearTranscriptBtn').addEventListener('click',()=>{finalText='';interim='';renderTranscript();$('reportOutput').className='report-output empty';$('reportOutput').textContent='Het verslag verschijnt automatisch wanneer je het gesprek stopt.';$('copyBtn').disabled=true});
+$('evaluationType').addEventListener('change',()=>{const l=typeLabels[$('evaluationType').value];$('modeLabel').textContent=l;$('reportTitle').textContent=l;$('guidanceOutput').innerHTML=`<strong>Open vraag</strong><p>${prompts[$('evaluationType').value]}</p><small>Gebruik OARS en reflecteer op verandertaal.</small>`});
+function generateReport(){const c=calculate(),type=typeLabels[$('evaluationType').value],date=new Date().toLocaleDateString('nl-NL');lastReport=`GLI ${type}\nDatum: ${date}\n\nMETINGEN\nLengte: ${value('height')||'niet ingevuld'} cm\nGewicht: ${value('currentWeight')||'niet ingevuld'} kg\nBuikomvang: ${value('currentWaist')||'niet ingevuld'} cm\nBMI: ${c.b?c.b.toFixed(1):'niet berekend'} (${classification(c.b)})\n\nSAMENVATTING GESPREK\n${finalText||'Geen transcriptie beschikbaar.'}\n\nVERVOLG EN AFSPRAKEN\nBesproken vervolgstap en concrete afspraak vastleggen in het dossier.\n\nCOACHREFLECTIE\nGebruik de OARS-principes en leg vast welke verandertaal en barrières naar voren kwamen.`; $('reportOutput').className='report-output';$('reportOutput').textContent=lastReport;$('copyBtn').disabled=false}
+$('generateBtn').addEventListener('click',generateReport);$('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(lastReport);$('copyBtn').textContent='✓ Gekopieerd';setTimeout(()=>$('copyBtn').textContent='⧉ Kopieer rapportage',1600)}catch(e){alert('Kopiëren is niet beschikbaar in deze browser. Selecteer de tekst handmatig.')}});calculate();updateGuidance();
