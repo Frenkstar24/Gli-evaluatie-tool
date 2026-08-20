@@ -31,16 +31,17 @@
 
     <div class="flow" aria-label="Werkwijze">
       <span class="flow-step active">1 Metingen</span><span>›</span>
-      <span class="flow-step">2 Opnemen in Word</span><span>›</span>
-      <span class="flow-step">3 Transcript importeren</span><span>›</span>
-      <span class="flow-step">4 Rapport kopiëren</span>
+      <span class="flow-step">2 Live gesprek</span><span>›</span>
+      <span class="flow-step">3 WAV naar Word</span><span>›</span>
+      <span class="flow-step">4 Definitief transcript</span><span>›</span>
+      <span class="flow-step">5 Rapport</span>
     </div>
 
     <section class="grid">
       <section class="card measurements">
         <div class="card-head">
           <div><span class="eyebrow">01 / Metingen</span><h3>Objectieve gegevens</h3></div>
-          <span class="status">BMI automatisch</span>
+          <span class="status">Verplicht · BMI automatisch</span>
         </div>
         <div class="form-grid">
           <label>Lengte (cm)<input id="height" type="number" min="100" max="250" step="0.1" inputmode="decimal" placeholder="bijv. 180"></label>
@@ -50,45 +51,71 @@
         <div class="metrics" id="metrics"></div>
       </section>
 
-      <aside class="card guidance">
+      <aside class="card guidance" aria-live="polite">
         <div class="card-head">
-          <div><span class="eyebrow">02 / Gesprekskaart</span><h3>Motiverende gespreksvoering</h3></div>
-          <span class="status">OARS</span>
+          <div><span class="eyebrow">02 / Live sturing</span><h3>Motiverende gespreksvoering</h3></div>
+          <span class="status" id="miStatus">Voor gesprek</span>
+        </div>
+        <div id="liveGuidance" class="live-guidance">
+          <span class="signal-label">Live feedback</span>
+          <strong>Start het gesprek voor live MI-signalen.</strong>
+          <p>De signalering is voorlopig en schrijft niets aan een spreker toe.</p>
         </div>
         <div id="guidanceOutput" class="guidance-output"></div>
         <button class="text-button" id="nextTipBtn" type="button">Volgende gesprekstip</button>
       </aside>
 
-      <section class="card word-flow">
+      <section class="card recording-card">
         <div class="card-head">
-          <div><span class="eyebrow">03 / Opname</span><h3>Transcriberen met Microsoft Word</h3></div>
+          <div><span class="eyebrow">03 / Live gesprek</span><h3>Opnemen en voorlopig transcriberen</h3></div>
           <span id="sessionStatus" class="status">Niet gestart</span>
         </div>
-        <div class="privacy-note"><strong>Vooraf:</strong> vraag toestemming voor opname. Word verwerkt en bewaart de opname binnen de Microsoft-omgeving van het gebruikte account. Voeg geen persoonsgegevens toe aan dit dashboard.</div>
-        <ol class="steps">
-          <li>Open Word voor het web en kies <strong>Start → Dicteren → Transcriberen</strong>.</li>
-          <li>Klik in Word op <strong>Opname starten</strong> en voer het gesprek.</li>
-          <li>Kies na afloop <strong>Opslaan en nu transcriberen</strong>.</li>
-          <li>Kopieer het volledige transcript met Speaker-labels en plak het hieronder.</li>
-        </ol>
+        <div class="privacy-note"><strong>Privacy:</strong> de WAV-opname blijft op dit apparaat totdat je deze zelf uploadt. De voorlopige spraakherkenning kan, afhankelijk van de browser, door de browserleverancier worden verwerkt. Noem daarom geen namen of andere herleidbare gegevens.</div>
         <label class="consent"><input id="consentCheck" type="checkbox"> De deelnemer heeft toestemming gegeven voor opname en transcriptie.</label>
         <div class="session-bar">
-          <div><span class="timer-label">Gespreksduur</span><strong id="timer">00:00</strong></div>
-          <div class="button-row">
-            <button class="primary" id="startBtn" type="button">Start evaluatie in Word</button>
-            <button class="secondary" id="stopBtn" type="button" disabled>Stop gesprek</button>
+          <div>
+            <span class="timer-label">Gespreksduur</span>
+            <strong id="timer">00:00</strong>
           </div>
+          <div class="level-wrap" aria-label="Microfoonniveau"><span>Microfoon</span><div class="level-track"><div id="micLevel" class="level-fill"></div></div></div>
+          <button class="primary session-button" id="startBtn" type="button">Start gesprek</button>
         </div>
-        <p id="wordHelp" class="support-text">Er wordt niets op deze website opgenomen. De knop opent Word voor het web in een nieuw tabblad.</p>
+        <p id="speechSupport" class="support-text">Chrome of Edge geeft de beste kans op live Nederlandse spraakherkenning. De WAV-opname werkt ook als live tekst niet beschikbaar is.</p>
+        <p id="wordHelp" class="support-text">Vul eerst alle drie de metingen in en geef toestemming.</p>
+
+        <div class="live-panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">Voorlopig transcript</span><h4>Live tekst — niet voor het dossier</h4></div>
+            <span id="liveTranscriptStatus" class="status">Wacht op gesprek</span>
+          </div>
+          <div id="liveTranscript" class="live-transcript">Hier verschijnt tijdens het gesprek de voorlopige tekst. Sprekers worden hier nog niet betrouwbaar onderscheiden.</div>
+        </div>
+
+        <div id="audioPanel" class="audio-panel" hidden>
+          <div>
+            <span class="eyebrow">Lokale opname gereed</span>
+            <h4>Gebruik deze WAV voor Word Transcribe</h4>
+          </div>
+          <audio id="audioPreview" controls></audio>
+          <div class="button-row">
+            <a class="primary" id="downloadWavBtn" download>Download WAV</a>
+            <a class="secondary" id="openWordBtn" href="https://word.cloud.microsoft/" target="_blank" rel="noopener noreferrer">Open Word Transcribe</a>
+          </div>
+          <ol class="steps compact">
+            <li>Download de WAV en open Word voor het web.</li>
+            <li>Kies <strong>Start → Dicteren → Transcriberen → Audio uploaden</strong>.</li>
+            <li>Laat Word Speaker 1 en Speaker 2 bepalen en kopieer het volledige transcript.</li>
+          </ol>
+        </div>
       </section>
 
       <section class="card transcript-card">
         <div class="card-head">
-          <div><span class="eyebrow">04 / Transcript</span><h3>Importeer het Word-transcript</h3></div>
+          <div><span class="eyebrow">04 / Definitief transcript</span><h3>Plak het Word-transcript</h3></div>
           <span id="transcriptStatus" class="status">Nog leeg</span>
         </div>
         <label class="wide">Transcript met sprekerlabels
-          <textarea id="transcriptInput" rows="13" placeholder="Plak hier het volledige Word-transcript, inclusief Speaker 1 en Speaker 2. De tool bepaalt automatisch welke spreker waarschijnlijk de coach is."></textarea>
+          <textarea id="transcriptInput" rows="13" placeholder="Plak hier het volledige Word-transcript, inclusief Speaker 1 en Speaker 2. Zodra twee sprekers zijn herkend, wordt het verslag automatisch gemaakt."></textarea>
         </label>
         <div class="import-row">
           <label class="file-button">Importeer .txt of .md<input id="transcriptFile" type="file" accept=".txt,.md,text/plain,text/markdown"></label>
@@ -103,7 +130,7 @@
           <div><span class="eyebrow">05 / Gespreksanalyse</span><h3>Voortgang en MI-signalen</h3></div>
           <span class="status">Automatisch</span>
         </div>
-        <div id="analysisOutput" class="analysis-grid empty-state">Importeer eerst een transcript.</div>
+        <div id="analysisOutput" class="analysis-grid empty-state">Importeer eerst een definitief Word-transcript.</div>
       </section>
 
       <section class="card report">
@@ -111,7 +138,7 @@
           <div><span class="eyebrow">06 / Rapportage</span><h3 id="reportTitle">GLI intake</h3></div>
           <span id="templateVersion" class="status">Bronformat</span>
         </div>
-        <pre id="reportOutput" class="report-output empty-state">Het verslag verschijnt na verwerking van het transcript.</pre>
+        <pre id="reportOutput" class="report-output empty-state">Het verslag verschijnt automatisch na verwerking van het definitieve transcript.</pre>
         <div class="report-actions">
           <button class="primary" id="copyBtn" type="button" disabled>Kopieer rapportage</button>
           <button class="secondary" id="generateBtn" type="button" disabled>Genereer opnieuw</button>
