@@ -1,26 +1,126 @@
 <!doctype html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GLI Evaluatiedashboard</title><link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Privacyvriendelijk GLI-evaluatiedashboard zonder persoonsgegevens">
+  <title>GLI Evaluatiedashboard</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar"><div><span class="eyebrow">GLI Slimmer</span><h1>Evaluatiedashboard</h1></div><div class="mode-pill" id="modeLabel">Intake evaluatie</div></header>
-<main class="dashboard">
-<section class="hero"><div><span class="eyebrow">Gespreksgestuurde verslaglegging</span><h2>Evaluatie zonder persoonsgegevens</h2><p>Vul alleen meetwaarden in. Start daarna het gesprek; transcriptie en rapportage blijven lokaal in deze browser.</p></div>
-<label class="evaluation-picker">Evaluatiemoment<select id="evaluationType"><option value="intake">Intake</option><option value="tussen">Tussen evaluatie</option><option value="eind">Eind evaluatie</option></select></label></section>
-<section class="grid">
-<div class="card measurements"><div class="card-head"><div><span class="eyebrow">01 / Metingen</span><h3>Objectieve voortgang</h3></div><span class="status">BMI automatisch</span></div>
-<div class="form-grid compact"><label>Lengte (cm)<input id="height" type="number" min="100" max="250" step="0.1" placeholder="bijv. 180"></label><label>Gewicht (kg)<input id="currentWeight" type="number" step="0.1" placeholder="huidig gewicht"></label><label>Buikomvang (cm)<input id="currentWaist" type="number" step="0.1" placeholder="gemeten waarde"></label></div>
-<div class="metrics" id="metrics"><div class="metric"><span>BMI</span><strong>—</strong></div><div class="metric"><span>Classificatie</span><strong>—</strong></div><div class="metric"><span>Buikomvang</span><strong>—</strong></div></div></div>
-<div class="card guidance"><div class="card-head"><div><span class="eyebrow">02 / Gesprekssturing</span><h3>Motiverende gespreksvoering</h3></div><span class="status live">● live</span></div><div id="guidanceOutput" class="guidance-output"><strong>Start met een open vraag</strong><p>“Hoe kijk je terug op de afgelopen periode?”</p><small>Luister naar verandertaal en reflecteer zonder direct oplossingen aan te dragen.</small></div></div>
-<div class="card conversation"><div class="card-head"><div><span class="eyebrow">03 / Gesprek</span><h3>Opnemen en live transcriberen</h3></div><span id="recordingStatus" class="status">Niet actief</span></div>
-<div class="privacy-note">De microfoonopname en transcriptie worden niet naar deze tool verzonden. Controleer toestemming en verwijder de tekst na verslaglegging als dat nodig is.</div>
-<div class="speaker-row"><span>Spreker voor nieuwe tekst:</span><button class="speaker active" data-speaker="Coach">Coach</button><button class="speaker" data-speaker="Deelnemer">Deelnemer</button></div>
-<div id="liveTranscript" class="transcript" aria-live="polite"><span class="placeholder">Live transcriptie verschijnt hier zodra je start.</span></div>
-<div class="conversation-actions"><button class="primary" id="startBtn">▶ Start evaluatie</button><button class="secondary" id="clearTranscriptBtn">Wis transcriptie</button></div>
-<p class="support-text" id="speechSupport"></p></div>
-<div class="card report"><div class="card-head"><div><span class="eyebrow">04 / Rapportage</span><h3 id="reportTitle">Intake evaluatie</h3></div><span class="status">Concept</span></div>
-<div id="reportOutput" class="report-output empty">Het verslag verschijnt automatisch wanneer je het gesprek stopt.</div><div class="report-actions"><button class="primary" id="copyBtn" disabled>⧉ Kopieer rapportage</button><button class="secondary" id="generateBtn">Genereer opnieuw</button></div></div>
-</section></main><script src="app.js"></script>
-</body></html>
+  <header class="topbar">
+    <div><span class="eyebrow">GLI Slimmer</span><h1>Evaluatiedashboard</h1></div>
+    <div class="mode-pill" id="modeLabel">Intake</div>
+  </header>
+
+  <main class="dashboard">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Gespreksgestuurde verslaglegging</span>
+        <h2>Eén gesprek, direct een bruikbaar verslag</h2>
+        <p>Geen naam, geboortedatum of contactgegevens. Alleen meetwaarden en de inhoud van het gesprek.</p>
+      </div>
+      <label class="evaluation-picker">Evaluatiemoment
+        <select id="evaluationType">
+          <option value="intake">Intake</option>
+          <option value="tussen">Tussen evaluatie</option>
+          <option value="eind">Eind evaluatie</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="flow" aria-label="Werkwijze">
+      <span class="flow-step active">1 Metingen</span><span>›</span>
+      <span class="flow-step">2 Opnemen in Word</span><span>›</span>
+      <span class="flow-step">3 Transcript importeren</span><span>›</span>
+      <span class="flow-step">4 Rapport kopiëren</span>
+    </div>
+
+    <section class="grid">
+      <section class="card measurements">
+        <div class="card-head">
+          <div><span class="eyebrow">01 / Metingen</span><h3>Objectieve gegevens</h3></div>
+          <span class="status">BMI automatisch</span>
+        </div>
+        <div class="form-grid">
+          <label>Lengte (cm)<input id="height" type="number" min="100" max="250" step="0.1" inputmode="decimal" placeholder="bijv. 180"></label>
+          <label>Gewicht (kg)<input id="currentWeight" type="number" min="20" max="350" step="0.1" inputmode="decimal" placeholder="bijv. 92,5"></label>
+          <label>Buikomvang (cm)<input id="currentWaist" type="number" min="40" max="250" step="0.1" inputmode="decimal" placeholder="bijv. 104"></label>
+        </div>
+        <div class="metrics" id="metrics"></div>
+      </section>
+
+      <aside class="card guidance">
+        <div class="card-head">
+          <div><span class="eyebrow">02 / Gesprekskaart</span><h3>Motiverende gespreksvoering</h3></div>
+          <span class="status">OARS</span>
+        </div>
+        <div id="guidanceOutput" class="guidance-output"></div>
+        <button class="text-button" id="nextTipBtn" type="button">Volgende gesprekstip</button>
+      </aside>
+
+      <section class="card word-flow">
+        <div class="card-head">
+          <div><span class="eyebrow">03 / Opname</span><h3>Transcriberen met Microsoft Word</h3></div>
+          <span id="sessionStatus" class="status">Niet gestart</span>
+        </div>
+        <div class="privacy-note"><strong>Vooraf:</strong> vraag toestemming voor opname. Word verwerkt en bewaart de opname binnen de Microsoft-omgeving van het gebruikte account. Voeg geen persoonsgegevens toe aan dit dashboard.</div>
+        <ol class="steps">
+          <li>Open Word voor het web en kies <strong>Start → Dicteren → Transcriberen</strong>.</li>
+          <li>Klik in Word op <strong>Opname starten</strong> en voer het gesprek.</li>
+          <li>Kies na afloop <strong>Opslaan en nu transcriberen</strong>.</li>
+          <li>Kopieer het volledige transcript met Speaker-labels en plak het hieronder.</li>
+        </ol>
+        <label class="consent"><input id="consentCheck" type="checkbox"> De deelnemer heeft toestemming gegeven voor opname en transcriptie.</label>
+        <div class="session-bar">
+          <div><span class="timer-label">Gespreksduur</span><strong id="timer">00:00</strong></div>
+          <div class="button-row">
+            <button class="primary" id="startBtn" type="button">Start evaluatie in Word</button>
+            <button class="secondary" id="stopBtn" type="button" disabled>Stop gesprek</button>
+          </div>
+        </div>
+        <p id="wordHelp" class="support-text">Er wordt niets op deze website opgenomen. De knop opent Word voor het web in een nieuw tabblad.</p>
+      </section>
+
+      <section class="card transcript-card">
+        <div class="card-head">
+          <div><span class="eyebrow">04 / Transcript</span><h3>Importeer het Word-transcript</h3></div>
+          <span id="transcriptStatus" class="status">Nog leeg</span>
+        </div>
+        <label class="wide">Transcript met sprekerlabels
+          <textarea id="transcriptInput" rows="13" placeholder="Plak hier het volledige Word-transcript, inclusief Speaker 1 en Speaker 2. De tool bepaalt automatisch welke spreker waarschijnlijk de coach is."></textarea>
+        </label>
+        <div class="import-row">
+          <label class="file-button">Importeer .txt of .md<input id="transcriptFile" type="file" accept=".txt,.md,text/plain,text/markdown"></label>
+          <button class="primary" id="processBtn" type="button">Verwerk transcript</button>
+          <button class="secondary" id="clearBtn" type="button">Wis gesprek</button>
+        </div>
+        <div id="speakerResult" class="speaker-result empty-state">Na verwerking verschijnen hier de automatisch bepaalde rollen.</div>
+      </section>
+
+      <section class="card analysis-card">
+        <div class="card-head">
+          <div><span class="eyebrow">05 / Gespreksanalyse</span><h3>Voortgang en MI-signalen</h3></div>
+          <span class="status">Automatisch</span>
+        </div>
+        <div id="analysisOutput" class="analysis-grid empty-state">Importeer eerst een transcript.</div>
+      </section>
+
+      <section class="card report">
+        <div class="card-head">
+          <div><span class="eyebrow">06 / Rapportage</span><h3 id="reportTitle">GLI intake</h3></div>
+          <span id="templateVersion" class="status">Bronformat</span>
+        </div>
+        <pre id="reportOutput" class="report-output empty-state">Het verslag verschijnt na verwerking van het transcript.</pre>
+        <div class="report-actions">
+          <button class="primary" id="copyBtn" type="button" disabled>Kopieer rapportage</button>
+          <button class="secondary" id="generateBtn" type="button" disabled>Genereer opnieuw</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="report-templates.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
